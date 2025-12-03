@@ -253,9 +253,6 @@ log_config = dict(
     hooks=[dict(type='TextLoggerHook'),
            dict(type='TensorboardLoggerHook')])
 
-# custom_hooks = [
-#     dict(type="HeadHook")
-# ]
 
 dist_params = dict(backend='nccl')
 log_level = 'INFO'

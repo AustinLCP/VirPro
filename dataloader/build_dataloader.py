@@ -25,18 +25,16 @@ def build_train_loader(cfg):
     train_dataset_RoI = kitti_dataloader_stage_1.KITTI3D_Object_Dataset_Raw_RoI_Lidar(cfg)
     sampler_weights_RoI = np.loadtxt(cfg.TRAIN.WEIGHT_FILE)
 
-    # 该对象用于根据指定的权重从数据集中对数据点进行采样
     sampler_RoI = WeightedRandomSampler(weights=sampler_weights_RoI,
                                         num_samples=len(sampler_weights_RoI),
                                         # num_samples=len(cfg.TRAIN.TRAIN_FILE),
-                                        replacement=True)  # 在单个epoch内可以对一个数据点进行多次采样
-    # 一个对象代表一个batch的数据内容
+                                        replacement=True)
     TrainImgLoader_RoI = DataLoader(train_dataset_RoI,
                                     batch_size=cfg.TRAIN.BATCH_SIZE,
                                     num_workers=cfg.TRAIN.WORKS,
                                     sampler=sampler_RoI,
-                                    pin_memory=True,  # 提高 GPU 的传输速度
-                                    drop_last=True)  # 如果数据集大小不能被批大小整除，则删除最后一个未完成的批处理
+                                    pin_memory=True,
+                                    drop_last=True)
     return TrainImgLoader_RoI
 
 

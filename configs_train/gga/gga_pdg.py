@@ -7,30 +7,6 @@ model = dict(
     # Resnet 101
     backbone=dict(frozen_stages=0),
     neck=dict(start_level=0, num_outs=4),
-
-    # Resnet 34
-    # backbone=dict(
-    #         _delete_=True,
-    #         type='ResNet',
-    #         depth=34,                  # ← 改为 ResNet-34
-    #         num_stages=4,
-    #         out_indices=(0, 1, 2, 3),  # 输出 C2~C5
-    #         frozen_stages=1,           # 视需要冻结到 stem/C1
-    #         norm_eval=True,
-    #         style='pytorch',
-    #         init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet34')
-    #     ),
-    # # 覆盖 FPN，最重要是 in_channels
-    # neck=dict(
-    #     _delete_=True,
-    #     type='FPN',
-    #     in_channels=[64, 128, 256, 512],  # ← ResNet-34 对应 C2~C5
-    #     out_channels=256,
-    #     start_level=0,
-    #     add_extra_convs='on_output',
-    #     num_outs=4
-    # ),
-
     bbox_head=dict(
         num_classes=3,
         bbox_code_size=7,
@@ -145,8 +121,6 @@ data = dict(
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        # ann_file=data_root + 'kitti_infos_trainval_GGA_pseudo_mono3d.coco.json',
-        # info_file=data_root + 'kitti_infos_trainval_GGA_pseudo.pkl',
         ann_file=data_root + 'kitti_infos_train_GGA_pseudo_mono3d.coco.json',
         info_file=data_root + 'kitti_infos_train_GGA_pseudo.pkl',
         img_prefix=data_root,
@@ -158,8 +132,6 @@ data = dict(
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        # ann_file=data_root + 'kitti_infos_trainval_GGA_pseudo_mono3d.coco.json',
-        # info_file=data_root + 'kitti_infos_trainval_GGA_pseudo.pkl',
         ann_file=data_root + 'kitti_infos_val_GGA_mono3d.coco.json',
         info_file=data_root + 'kitti_infos_val_GGA.pkl',
         img_prefix=data_root,
@@ -191,22 +163,15 @@ optimizer_config = dict(
     _delete_=True, grad_clip=dict(max_norm=35, norm_type=2))
 
 # learning policy
-# Step
-# lr_config = dict(
-#     policy='step',
-#     warmup='linear',
-#     warmup_iters=500,
-#     warmup_ratio=1.0 / 3,
-#     step=[32, 44])
 # Cosine Annealing
 lr_config = dict(
-    _delete_=True,              # 关键：先把继承到的 step 配置删掉
+    _delete_=True,
     policy='CosineAnnealing',
-    by_epoch=True,              # 常用：按 epoch 调度
+    by_epoch=True,
     warmup='linear',
-    warmup_iters=1000,          # 建议：蒸馏时加长 warmup
+    warmup_iters=1000,
     warmup_ratio=1.0/5,
-    min_lr=1e-6                 # 余弦的最小学习率
+    min_lr=1e-6
 )
 
 runner = dict(type='EpochBasedRunner', max_epochs=48)
@@ -220,30 +185,9 @@ log_config = dict(
     interval=50,
     hooks=[dict(type='TextLoggerHook'),
            dict(type='TensorboardLoggerHook'),
-           dict(
-               type='WandbLoggerHook',
-               init_kwargs=dict(
-                   project='GGA',  # 你在 wandb 创建的项目名
-                   # entity='your_wandb_username',  # 你的 wandb 用户名
-                   name='GGA+PGD',  # 这次实验的 run 名字
-                   config=dict(
-                       lr=0.001,
-                       batch_size=6,
-                       max_epochs=48,
-                       model='GGA+PGD'
-                   )
-               ),
-               # interval=1,  # 每个 epoch 记录一次
-               by_epoch=True,
-               # log_checkpoint=True,
-               # log_checkpoint_metadata=True,
-               # num_eval_images=20
-           )
            ])
 
 distill = dict(
-    # teacher_ckpt='ckp/pretrain/VirPro_Resnet101_12.pth',
-    # teacher_ckpt='ckp/pretrain/VirPro_gt_bbox2d_finetune_25.pth',
-    teacher_ckpt='ckp/pretrain/VirPro_cyclist_19.pth',
-    kd_weight=0.25                         # 蒸馏损失系数
+    teacher_ckpt='ckp/pretrain/VirPro_pretrain.pth',
+    kd_weight=0.25
 )

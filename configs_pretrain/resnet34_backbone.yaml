@@ -1,4 +1,4 @@
-EXP_NAME : "VirPro_cyclist"
+EXP_NAME : "VirPro_pretrain"
 NET_LAYER : 101
 
 TRAIN:

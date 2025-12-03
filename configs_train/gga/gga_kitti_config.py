@@ -251,30 +251,7 @@ log_config = dict(
     interval=50,
     hooks=[dict(type='TextLoggerHook'),
            dict(type='TensorboardLoggerHook'),
-           dict(
-               type='WandbLoggerHook',
-               init_kwargs=dict(
-                   project='GGA',  # 你在 wandb 创建的项目名
-                   # entity='your_wandb_username',  # 你的 wandb 用户名
-                   name='Point_encoder_train',  # 这次实验的 run 名字
-                   config=dict(
-                       lr=0.0015,
-                       batch_size=16,
-                       max_epochs=120,
-                       model='GGA'
-                   )
-               ),
-               # interval=1,  # 每个 epoch 记录一次
-               by_epoch=True,
-               # log_checkpoint=True,
-               # log_checkpoint_metadata=True,
-               # num_eval_images=20
-           )
            ])
-
-# custom_hooks = [
-#     dict(type="HeadHook")
-# ]
 
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
