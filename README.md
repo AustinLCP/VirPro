@@ -70,7 +70,7 @@ Our paradigm adopts a two-stage training pipeline. In the first stage, as shown 
 ## 🔧 How to Run
 ### 1. Preliminary
 
-GGA is a weakly supervised point encoder that outputs 3D bounding boxes. [PGD](https://github.com/open-mmlab/mmdetection3d) is a fully supervised monocular 3D encoder. In the GGA+PGD training pipeline, the 3D boxes predicted by GGA are used as pseudo labels to replace the ground-truth annotations required by PGD. This project integrates the VirPro pretraining paradigm into the GGA+PGD framework to further enhance weakly supervised monocular 3D detection performance and validate its effectiveness
+GGA is a weakly supervised point encoder that outputs 3D bounding boxes. [PGD](https://github.com/open-mmlab/mmdetection3d) is a fully supervised monocular 3D encoder. In the GGA+PGD training pipeline, the 3D boxes predicted by GGA are used as pseudo labels to replace the ground-truth annotations required by PGD. This project integrates the VirPro pretraining paradigm into the GGA+PGD framework to further enhance weakly supervised monocular 3D detection performance.
 
 
 ### 2. Installation
