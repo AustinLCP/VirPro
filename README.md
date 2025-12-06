@@ -67,4 +67,92 @@ Our paradigm adopts a two-stage training pipeline. In the first stage, as shown 
 
 
 
-### 🔧 How to Run
+## 🔧 How to Run
+### 1. Preliminary
+
+GGA is a weakly supervised point encoder that outputs 3D bounding boxes. [PGD](https://github.com/open-mmlab/mmdetection3d) is a fully supervised monocular 3D encoder. In the GGA+PGD training pipeline, the 3D boxes predicted by GGA are used as pseudo labels to replace the ground-truth annotations required by PGD. This project integrates the VirPro pretraining paradigm into the GGA+PGD framework to further enhance weakly supervised monocular 3D detection performance and validate its effectiveness
+
+
+### 2. Installation
+
+```bash
+conda create --name virpro python=3.8 -y
+conda activate virpro 
+
+conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 -c pytorch
+
+pip install openmim
+mim install mmcv-full==1.4.0
+mim install mmdet==3.3.0
+mim install mmsegmentation==0.14.1
+
+pip install -e .
+```
+
+
+### 3. Data Preparation
+**Dataset Structure Example**
+```
+data
+└── kitti
+    ├── ImageSets
+    │   ├── test.txt
+    │   ├── train.txt
+    │   └── val.txt
+    ├── training
+        └── calib
+        └── image_2
+        └── velodyne
+    ├── testing
+        └── calib
+        └── image_2
+        └── velodyne
+        └── label
+    ├── kitti_infos_train_GGA_pseudo.pkl
+    ├── kitti_infos_train_GGA_pseudo_mono3d.coco.json
+    ├── kitti_infos_val_GGA_pseudo.pkl
+    ├── kitti_infos_val_GGA_pseudo_mono3d.coco.json
+```
+
+---
+
+
+**KITTI Object 3D**
+
+Download from:
+https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d
+
+
+**KITTI Raw**
+```bash
+wget -i ./kitti_archives_to_download.txt -P kitti_data/
+cd kitti_data
+unzip "*.zip"
+cd ..
+ln -s kitti_data ./data/kitti/kitti_raw
+```
+
+**GGA Pseudo Labels**
+
+You may generate pseudo labels following the procedures provided in the original GGA project. This repository also includes pre-generated pseudo labels (`.pkl` files), which can be used directly.
+
+
+### 4. Training
+
+Stage 1 — VirPro Pretraining
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/pretrain_ppl_multi.py     --config ./config/resnet34_backbone.yaml
+```
+
+Stage 2 — GGA+PGD Training
+
+```bash
+./tools/dist_train.sh configs/gga/gga_pdg.py 1
+```
+
+### 5. Testing
+
+```bash
+./tools/dist_test.sh configs/gga/gga_pdg.py 1
+```
