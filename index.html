@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VirPro Project Page - CVPR 2026</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .title {
+            font-size: 3.2em;
+            font-weight: 700;
+            color: #333333;
+            line-height: 1.2;
+            margin-bottom: 15px;
+        }
+
+        .authors {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .conference {
+            font-size: 1em;
+            color: #888;
+        }
+        .links {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .links a {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #4285f4;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .links a:hover {
+            background-color: #3367d6;
+        }
+        .section {
+            margin-top: 40px;
+        }
+        .section h2 {
+            font-size: 2em;
+            color: #333;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        .highlight img, .figure-placeholder {
+            width: 100%;
+            max-width: 860px;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+        }
+        .figure-placeholder {
+            min-height: 250px;
+            background-color: #f0f0f0;
+            display: block;
+
+
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 0.9em;
+            color: #888;
+        }
+        .key-point {
+            font-weight: bold;
+            color: #c0392b; /* Emphasis color */
+        }
+
+        /* ---------- Responsive media helpers ---------- */
+        .responsive-img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .method-figure, .result-figure {
+            margin: 20px auto;
+            max-width: 860px; /* container (900) - padding (2*20) */
+        }
+        .method-figure img {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .result-figure img {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .subsection-title {
+            font-size: 1.45em;
+            margin: 22px 0 10px 0;
+            color: #333;
+        }
+        .two-up {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+        @media (min-width: 820px) {
+            .two-up {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">VirPro: Visual-referred Probabilistic Prompt Learning for Weakly-Supervised Monocular 3D Detection</div>
+<!--            <div class="authors">VirPro Team <sup>*</sup></div>-->
+            <div class="conference">
+                Anonymous CVPR 2026 Submission
+<!--                <p style="font-size: 0.8em; color: #aaa;"><sup>*</sup>Authorship is anonymous. Please replace with your actual institution/names.</p>-->
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="[PAPER_PDF_LINK]" target="_blank">📄 Paper </a>
+            <a href="[GITHUB_LINK]" target="_blank">💻 Code </a>
+<!--            <a href="[DATA_DEMO_LINK]" target="_blank">📈 Data & Demo</a>-->
+        </div>
+
+        <div class="section">
+            <h2>Abstract</h2>
+            <p>Monocular 3D object detection leverages deterministic linguistic cues as effective auxiliary weak supervision, providing complementary semantic context. However, hand-crafted textual descriptions struggle to capture the inherent visual diversity of individuals across scenes, limiting the model's ability to learn scene-aware representations. To address this challenge, we propose <strong>Visual-referred Probabilistic Prompt Learning (VirPro)</strong>, an adaptive multi-modal pretraining paradigm that can be seamlessly integrated into diverse weakly-supervised monocular 3D detection (WS-M3D) frameworks. Specifically, we generate a diverse set of instance-conditioned learnable prompts stored in an <span class="key-point">Adaptive Prompt Bank (APB)</span>. Subsequently, we introduce <span class="key-point">Multi-Gaussian Prompt Modeling (MGPM)</span>, which incorporates scene-based visual features into corresponding text embeddings, allowing the text prompts to express visual uncertainty. By fusing the visual-linguistic embeddings, we further decode the Gaussian distribution of the prompted object and derive a unified object-level prompt embedding for each instance. We employ RoI-level contrastive matching to enforce modality alignment, making the embeddings of co-occurring objects within the same scene closer in the latent space, thereby enhancing semantic coherence. Extensive experiments on the KITTI benchmark show that integrating our pretraining paradigm consistently leads to significant performance improvements, achieving up to a 4.8% average precision gain over the baseline model.</p>
+        </div>
+
+        <div class="section highlight">
+            <h2>Method Overview</h2>
+            <p>Our paradigm adopts a two-stage training pipeline. In the first stage, as shown in the following figure, we introduce an Adaptive Prompt Bank (APB) to generate diverse, instance-specific prompts. We further propose Multi-Gaussian Prompt Modeling (MGPM), which injects visual cues into textual embeddings and represents each prompt as a multivariate Gaussian distribution. A unified prompt embedding is then sampled and normalized for each instance, followed by RoI-level Contrastive Matching to align monocular 3D object embeddings with their corresponding textual prompts embeddings. In the second stage, we adopt the Dual-to-One Distillation (D2OD) strategy from CAW3D to transfer the learned scene-aware priors into the monocular encoder.</p>
+
+            <figure class="method-figure">
+                <img src="fig/framework.png" class="responsive-img" alt="VirPro method overview framework">
+            </figure>
+
+<!--            <h3>Key Components of the Method:</h3>-->
+<!--            <ul>-->
+<!--                <li><span class="key-point">Adaptive Prompt Bank (APB)</span>: Generates diverse, learnable scene descriptors for each object instance to guide the latent space structure.</li>-->
+<!--                <li><span class="key-point">Multi-Gaussian Prompt Modeling (MGPM)</span>: Injects visual cues into the prompt embeddings and parameterizes the prompts as a multi-variate Gaussian distribution, where the mean captures canonical semantics and the variance represents visual uncertainty.</li>-->
+<!--&lt;!&ndash;                <li><span class="key-point">RoI-level Contrastive Matching</span>: Pools the sampled probabilistic prompts for region-level (RoI-level) contrastive learning to align semantics between visual and text modalities.</li>&ndash;&gt;-->
+<!--            </ul>-->
+        </div>
+
+        <div class="section">
+            <h2>Results</h2>
+
+            <h3 class="subsection-title">Quantitative Results</h3>
+            <p>We conducted extensive experiments on the <strong>KITTI benchmark</strong> to validate the effectiveness of our proposed pretraining paradigm. As shown in the following tables, our method, as an auxiliary weak supervision signal, significantly boosts the performance of existing WS-M3D frameworks. The best and second-best results are highlighted in <span style="color: red;">red</span> and <span style="color: blue;">blue</span>, respectively.</p>
+
+            <div class="two-up">
+                <figure class="result-figure" style="text-align: center; margin: 0;">
+                    <img src="fig/car_val.png" class="responsive-img" alt="Quantitative results on KITTI val (Car)">
+                    <figcaption style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                        Performance comparison conducted on the KITTI <strong>val</strong> set for the "Car" category. All results are evaluated using the AP40 metric with an IoU threshold of 0.5.
+                    </figcaption>
+                </figure>
+
+                <figure class="result-figure" style="text-align: center; margin: 0;">
+                    <img src="fig/car_test.png" class="responsive-img" alt="Quantitative results on KITTI test (Car)">
+                    <figcaption style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                        Performance comparison on the KITTI <strong>test</strong> set for the "Car" category.
+                    </figcaption>
+                </figure>
+            </div>
+
+            <h3 class="subsection-title">Qualitative Results</h3>
+            <figure class="result-figure" style="text-align: center;">
+                <img src="fig/3D_bbox_visual_WeakM3D.png" class="responsive-img" alt="Qualitative visualization: WeakM3D baseline vs ours">
+                <img src="fig/3D_bbox_visual_GGA.png" class="responsive-img" alt="Qualitative visualization: GGA+PGD baseline vs ours" style="margin-top: 12px;">
+                <figcaption style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                    Visualization on the KITTI validation set comparing ours to the WeakM3D and GGA+PGD baseline. WeakM3D is a WS-M3D work with pure 3D pseudo-labels. GGA + PGD is a WS-M3D baseline employing both 3D pseudo-labels and static textual prompts. Predicted boxes are rendered in <span style="color: green;">green</span>, and ground-truth boxes are shown in <span style="color: red;">red</span>.
+                </figcaption>
+            </figure>
+        </div>
+
+
+        </div>
+
+        <div class="footer">
+            © 2025 VirPro Team. All rights reserved. | Powered by GitHub Pages.
+        </div>
+    </div>
+</body>
+</html>
