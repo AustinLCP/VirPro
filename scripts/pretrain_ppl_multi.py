@@ -34,10 +34,7 @@ def train(cfg):
     exp_name = cfg.EXP_NAME
     layer = cfg.NET_LAYER
     restore_epoch = cfg.RESTORE_EPOCH
-    lr = cfg.TRAIN.LR
     epochs = cfg.TRAIN.EPOCH
-    dim_prior = cfg.DATA.DIM_PRIOR
-    gt_dir = cfg.VAL.GT_DIR
 
     log.prepare_dirs(cfg)
     log.init_logger(cfg)
@@ -107,7 +104,7 @@ def train(cfg):
             batch_input = build_dataloader.process_batch_data(sample)
 
             # image modality
-            img_feat, img_roi_feat = image_encoder(batch_input['l_img'], batch_input['bbox2d']) # img_feat: [16,256,24,77], roi: [48,256,7,7] (B=16,n_roi=3)
+            img_feat, img_roi_feat = image_encoder(batch_input['l_img'], batch_input['bbox2d'])
             conv = nn.Conv2d(in_channels=1024, out_channels=512, kernel_size=1) # Resnet101: 1024->512, Resnet34:256->512
             img_feat = conv(img_feat) # [16,512,24,77]
 

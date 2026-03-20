@@ -127,13 +127,9 @@ class KITTI3D_Object_Dataset_Raw_RoI_Lidar(KITTI3D_Object_Dataset):
         self.train_len = len(self.train_file)
 
         self.train_hw = cfg.TRAIN.IMAGE_HW
-        self.sample_roi_points = cfg.TRAIN.SAMPLE_ROI_POINTS
         self.train_weight_file = cfg.TRAIN.WEIGHT_FILE
 
         self.batch_size = cfg.TRAIN.BATCH_SIZE
-
-        self.dim_prior = cfg.DATA.DIM_PRIOR
-        self.random_flip = cfg.TRAIN.FLIP
 
         self.__build_weights__(self.train_weight_file)
 
@@ -141,7 +137,6 @@ class KITTI3D_Object_Dataset_Raw_RoI_Lidar(KITTI3D_Object_Dataset):
         if os.path.exists(weight_path):
             return
         weights = [len(pickle.load(open(i, 'rb'))['bbox2d']) for i in self.lidar_RoI_points_path_list]
-        # weights = [sum(1 for _ in open(i)) for i in self.lidar_RoI_points_path_list]
         np.savetxt(weight_path, np.array(weights))
         print('generate weights, done!, the valid training sample (the number of valid objects > 0) is : {}'.format(np.sum(np.array(weights) > 0)))
 
@@ -149,19 +144,10 @@ class KITTI3D_Object_Dataset_Raw_RoI_Lidar(KITTI3D_Object_Dataset):
     def __getitem__(self, index):
         cv.setNumThreads(0)
         l_img_name = self.img_list[index]
-        # load calib files
-        if self.data_mode == 'KITTI 3D':
-            calib = calib_parse.parse_calib('3d', self.calib_list[index])
-        else:
-            calib = calib_parse.parse_calib('raw', [self.calib_cam_to_cam_list[index], self.calib_velo_to_cam_list[index]])
 
-        bbox2d = []
-        with open(self.lidar_RoI_points_path_list[index], 'r') as f:
-            for line in f:
-                parts = line.strip().split()
-                bbox2d.append(list(map(float, parts)))
-        # bbox2d = np.array(bbox2d, dtype=np.float32)
-        # print(bbox2d)
+        with open(self.lidar_RoI_points_path_list[index], 'rb') as f:
+            RoI_box_points = pickle.load(f)
+        bbox2d = RoI_box_points['bbox2d']
 
         l_img, bbox_shift = self.cut_or_pad_img(l_img_name, self.train_hw)
         bbox2d += bbox_shift

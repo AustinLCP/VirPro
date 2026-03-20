@@ -68,6 +68,19 @@ Our paradigm adopts a two-stage training pipeline. In the first stage, as shown 
 
 
 ## 🔧 How to Run
+
+### To Do List
+- [ ] Environment setup 
+- [ ] Data preparation
+  - Stage 1 requires:
+    - KITTI RAW 
+    - 2D RoI Label
+  - Stage 2 requires:
+    - KITTI Object 3D
+    - GGA Pseudo Labels
+- [ ] Run Stage 1: VirPro pretraining
+- [ ] Run Stage 2: GGA+PGD training
+- [ ] Run test
 ### 1. Preliminary
 
 GGA is a weakly supervised point encoder that outputs 3D bounding boxes. [PGD](https://github.com/open-mmlab/mmdetection3d) is a fully supervised monocular 3D encoder. In the GGA+PGD training pipeline, the 3D boxes predicted by GGA are used as pseudo labels to replace the ground-truth annotations required by PGD. This project integrates the VirPro pretraining paradigm into the GGA+PGD framework to further enhance weakly supervised monocular 3D detection performance.
@@ -103,6 +116,7 @@ data
         └── calib
         └── image_2
         └── velodyne
+        └── predicted_2d_bbox
     ├── testing
         └── calib
         └── image_2
@@ -116,13 +130,6 @@ data
 
 ---
 
-
-**KITTI Object 3D**
-
-Download from:
-https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d
-
-
 **KITTI Raw**
 ```bash
 wget -i ./kitti_archives_to_download.txt -P kitti_data/
@@ -131,6 +138,18 @@ unzip "*.zip"
 cd ..
 ln -s kitti_data ./data/kitti/kitti_raw
 ```
+
+
+**2D RoI Labels**
+
+[WeakM3D](https://github.com/charlesq34/frustum-pointnets) provides both 2D bounding boxes and the corresponding RoI LiDAR points. For each sample in the dataset, the provided [KITTI_RAW pseudo label](https://drive.google.com/file/d/1xzuAqty5GEiQSqBS5hpVm3LRl0tTNkT8/view) stores these two modalities in a single `.npz` file. In our case, we only utilize the 2D bounding boxes as our 2D RoI labels. Please download and unpack this folder. Then rename it as `predicted_2d_bbox`.
+
+
+**KITTI Object 3D**
+
+Download from:
+https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d
+
 
 **GGA Pseudo Labels**
 
