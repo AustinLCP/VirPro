@@ -153,7 +153,7 @@ https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d
 
 **GGA Pseudo Labels**
 
-You may generate pseudo labels following the procedures provided in the original [GGA](https://github.com/gwenzhang/GGA) project. This repository also includes pre-generated pseudo labels (`data/kitti/*.pkl` files), which can be used directly.
+You may generate pseudo labels following the procedures provided in the original [GGA](https://github.com/gwenzhang/GGA) project. Our repository also includes pre-generated pseudo labels (`data/kitti/*.pkl` files), which can be used directly.
 
 
 ### 4. Training
@@ -166,18 +166,18 @@ CUDA_VISIBLE_DEVICES=0 python scripts/pretrain_ppl_multi.py --config ./config/re
 
 Then use `utils/ckp_pretrain_to_train.py` to convert a Stage 1 VirPro checkpoint into a backbone-only training checkpoint.
 
-- **`input_checkpoint.pth`**: the checkpoint obtained after Stage~1 pretraining  
-- **`output_checkpoint.pth`**: the converted checkpoint for Stage~2 training  
+- **`input_checkpoint.pth`**: the checkpoint obtained after Stage 1 pretraining  
+- **`output_checkpoint.pth`**: the converted checkpoint for Stage 2 training  
 
 ```bash
 python utils/ckp_pretrain_to_train.py [input_checkpoint.pth] [output_checkpoint.pth]
 ```
 
-Before running Stage 2, remember to specify the converted checkpoint as:
+Before running Stage 2, on line 190 in `configs_train/gga/gga_pdg.py`, remember to specify the converted checkpoint as:
 ```python
 distill.teacher_ckpt = "path/to/output_checkpoint.pth"
 ```
-in `configs_train/gga/gga_pdg.py` on line 190.
+
 
 
 #### Stage 2 — GGA+PGD Training
