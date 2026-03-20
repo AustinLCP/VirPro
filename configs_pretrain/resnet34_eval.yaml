@@ -1,7 +1,0 @@
-EXP_NAME : "Resnet34"
-
-NET_LAYER : 34
-RESTORE_PATH : "ckp_OV_WeakM3D/train_TAI_all_double_encoder_concat_mlp_mse_2/TAI_all_double_encoder_concat_mlp_mse_2_47.pkl" # Pretrained Model Path
-
-INFER:
-  WORKS: 4
