@@ -37,10 +37,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class DistillWrapper(nn.Module):
-    """
-    学生-教师蒸馏包装器：仅对齐 backbone 的最后一级特征做 MSE，
-    同时保留原有 3D task loss（由 student.forward_train 产生）。
-    """
     def __init__(self, student, teacher, kd_weight=0.25):
         super().__init__()
         self.student = student
@@ -53,11 +49,8 @@ class DistillWrapper(nn.Module):
             p.requires_grad_(False)
         self.teacher.eval()
 
-        # 用于暂存 student 的 backbone 输出（整个tuple/list）
         self._feat_bucket = {}
 
-        # 在 student.backbone 上注册 hook，捕获其 forward 输出
-        # 大多数 ResNet 返回 tuple/list [C2, C3, C4, C5]，我们仅用最后一级
         def _bk_hook(_m, _inp, out):
             self._feat_bucket['s_backbone_feats'] = out
         self._hook_handle = self.student.backbone.register_forward_hook(_bk_hook)
@@ -65,7 +58,6 @@ class DistillWrapper(nn.Module):
 
     # learnable kd_weight only
     def _parse_losses(self, losses):
-        """最小实现：把各项 loss 做 mean 并累加；同时生成可记录的 log_vars（标量）。"""
         log_vars = {}
         loss = 0
 
@@ -74,14 +66,11 @@ class DistillWrapper(nn.Module):
                 log_vars[name] = value.mean()
                 loss = loss + log_vars[name]
             elif isinstance(value, list):
-                # 兼容 list[tensor]
                 log_vars[name] = sum(v.mean() for v in value)
                 loss = loss + log_vars[name]
             else:
-                # 跳过非 tensor 的项（如字符串、字典等）
                 continue
 
-        # runner 期望的 'loss' 键会被 OptimizerHook 用来 backward()
         log_vars['loss'] = loss
 
         # 转为 python 标量便于 logger 记录
@@ -90,20 +79,9 @@ class DistillWrapper(nn.Module):
 
 
     def train_step(self, data, optimizer):
-        """
-        兼容 MMCV Runner：
-        - data: DataContainer 抽出来后一般是普通 Tensor/列表字典
-        - 返回 dict(loss=..., log_vars=..., num_samples=...)
-        """
-        # 通常数据里键名和 Collect3D 对应：'img', 'gt_bboxes', 'gt_labels', ...
-        # 让学生网络先做一次前向以获得任务损失，然后在 forward_train 里已加入 KD
-        # 这里直接调用 wrapper 的 forward(**data) 或 forward_train(**data)
-        # 为了兼容 MMDet 的日志与反传，使用学生的 _parse_losses
         losses = self.forward_train(**data)
-        # BaseDetector 有 _parse_losses；我们直接复用学生的实现
         loss, log_vars = self.student._parse_losses(losses)  # type: ignore
         # loss, log_vars = self._parse_losses(losses)
-        # 由 Runner/OptimHook 负责 optimizer.step()，这里只返回张量 loss
         outputs = dict(
             loss=loss,
             log_vars=log_vars,
@@ -113,49 +91,35 @@ class DistillWrapper(nn.Module):
 
     @staticmethod
     def _last_map(x):
-        # 仅取最后一级特征图
         if isinstance(x, (list, tuple)):
             return x[-1]
         return x
 
     @torch.no_grad()
     def _teacher_last(self, img):
-        # 只走 backbone，拿多尺度中的最后一级（通常是 layer4/C5）
         t_feats = self.teacher.backbone(img)  # 直接 backbone
         return self._last_map(t_feats)
 
     def forward_train(self, img, **data_samples):
-        # 1) 先得到 teacher 的最后一级特征（无梯度）
         t_last = self._teacher_last(img)
 
-        # 2) 运行 student 的训练前向，产生任务损失；
-        #    同时 hook 会把 student.backbone 的输出放入 feat_bucket
         losses = self.student.forward_train(img=img, **data_samples)
 
-        # 3) 取出 student 的最后一级特征
         s_feats_all = self._feat_bucket.pop('s_backbone_feats', None)
         if s_feats_all is None:
             print('student backbone features is None')
-            return losses  # 理论上不会发生，仅做兜底
+            return losses
         s_last = self._last_map(s_feats_all)
 
-        # 4) 形状对齐后做 MSE
-        #    a) 空间尺寸对齐到学生
         if t_last.shape[-2:] != s_last.shape[-2:]:
             t_last = F.interpolate(t_last, size=s_last.shape[-2:], mode='bilinear', align_corners=False)
-        #    b) 通道不一致时，取前 min(Ct, Cs) 做 MSE（稳定、省事）
         if t_last.shape[1] != s_last.shape[1]:
             c = min(t_last.shape[1], s_last.shape[1])
             kd = F.mse_loss(s_last[:, :c], t_last[:, :c])
         else:
-            # print("s: "+ str(s_last.shape))
-            # print("t: "+str(t_last.shape))
             kd = F.mse_loss(s_last, t_last)
 
         losses['loss_kd_backbone_last_mse'] = kd * self.kd_weight
-        # effective_kd_weight = F.softplus(self.kd_weight_raw)
-        # losses['loss_kd_backbone_last_mse'] = kd * effective_kd_weight
-        # print(losses)
         return losses
 
     def forward(self, *args, **kwargs):
@@ -354,34 +318,18 @@ def main():
     meta['seed'] = seed
     meta['exp_name'] = osp.basename(args.config)
 
-    # model = build_model(
-    #     cfg.model,
-    #     train_cfg=cfg.get('train_cfg'),
-    #     test_cfg=cfg.get('test_cfg'))
-    # model.init_weights()
-    #
-    # state_dict = torch.load('ckp/PGD_pretrain.pth')
-    # missing, unexpected = model.load_state_dict(state_dict, strict=False)
-    # loaded_keys = set(state_dict.keys()) - set(unexpected)
-    # print("==== 成功加载的 keys ====")
-    # for i, key in enumerate(loaded_keys):
-    #     print(i, key)
-
     model = build_model(cfg.model,
                         train_cfg=cfg.get('train_cfg'),
                         test_cfg=cfg.get('test_cfg'))
     model.init_weights()
 
-    # 从配置读取
     teacher_ckpt = cfg.get('distill', {}).get('teacher_ckpt', None)
     kd_weight = cfg.get('distill', {}).get('kd_weight', 1.0)
-    assert teacher_ckpt is not None, '请在 cfg.distill.teacher_ckpt 指定教师权重路径'
+    assert teacher_ckpt is not None, 'please define cfg.distill.teacher_ckpt'
 
-    # teacher 结构与 student 一致
     teacher = build_model(cfg.model, train_cfg=None, test_cfg=cfg.get('test_cfg'))
     teacher.init_weights()
 
-    # 只加载到 teacher
     t_state = torch.load(teacher_ckpt, map_location='cpu')
     missing, unexpected = teacher.load_state_dict(t_state, strict=False)
     loaded_keys = set(t_state.keys()) - set(unexpected)
@@ -389,9 +337,7 @@ def main():
     for i, key in enumerate(loaded_keys):
         print(i, key)
 
-    # 用蒸馏包装器替换 student
     model = DistillWrapper(student=model, teacher=teacher, kd_weight=kd_weight)
-
 
     logger.info(f'Model:\n{model}')
     datasets = [build_dataset(cfg.data.train)]

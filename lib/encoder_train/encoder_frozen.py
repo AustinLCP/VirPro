@@ -44,6 +44,6 @@ class ResnetEncoder(nn.Module):
         self.features.append(self.encoder.layer2(self.features[-1]))
         self.features.append(self.encoder.layer3(self.features[-1]))
 
-        last_feat = self.features[-1] # [8,256,24,77]
+        last_feat = self.features[-1]
 
         return last_feat

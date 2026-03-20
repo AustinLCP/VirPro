@@ -142,17 +142,17 @@ You may generate pseudo labels following the procedures provided in the original
 Stage 1 — VirPro Pretraining
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python scripts/pretrain_ppl_multi.py     --config ./config/resnet34_backbone.yaml
+CUDA_VISIBLE_DEVICES=0 python scripts/pretrain_ppl_multi.py --config ./config/resnet34_backbone.yaml
 ```
 
 Stage 2 — GGA+PGD Training
 
 ```bash
-./tools/dist_train.sh configs/gga/gga_pdg.py 1
+./tools/dist_train.sh configs_train/gga/gga_pdg.py 1
 ```
 
 ### 5. Testing
 
 ```bash
-./tools/dist_test.sh configs/gga/gga_pdg.py 1
+./tools/dist_test.sh configs_train/gga/gga_pdg.py 1
 ```

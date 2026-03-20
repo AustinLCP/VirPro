@@ -58,11 +58,9 @@ class ResnetEncoder(nn.Module):
         )
 
         self.text_projection = projection(512,512)
-        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))  # not frozen
+        self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
 
-    # image_feature [24,256,7,7]
-    # text_feature [8, 3, 512]
     def roi_contrastive_matching(self, image_features, text_features):
 
         assert torch.isfinite(image_features).all(), "image_features pre-pool has NaN/Inf"
@@ -76,16 +74,7 @@ class ResnetEncoder(nn.Module):
         text_features = text_features.reshape(-1, emb_dim) # [24, 512]
 
         # image/text feature distribution align
-        # text_projection = projection(text_features.shape[-1], image_features.shape[-1])
-        # text_features = text_projection(text_features)
         text_features = self.text_projection(text_features)
-
-        # n_img = image_features.norm(dim=1)
-        # assert torch.all(n_img > 0), "zero-norm row detected in image feature"
-        #
-        # n_txt = text_features.norm(dim=1)
-        # assert torch.all(n_txt >0 ), "zero-norm row detected in text feature"
-
 
         # normalized features
         image_features = image_features / (image_features.norm(dim=1, keepdim=True).clamp_min(1e-6))
@@ -111,9 +100,6 @@ class ResnetEncoder(nn.Module):
         return loss
 
     def forward(self, input_image, bbox):
-        # print(" ")
-        # print(bbox)
-        # print(" ")
 
         self.features = []
         x = self.encoder.conv1(input_image)
@@ -131,27 +117,18 @@ class ResnetEncoder(nn.Module):
             # for eval [n_roi,dim]
             f = torchvision.ops.roi_align(last_feat, [bbox/16], (7, 7))
 
-        # f = f.view(-1, self.res_feat_chs * 7 * 7)  # [24,256x7x7]
-
         return last_feat, f
 
 
-# 把 text 分布映射到 image 的分布
 class projection(nn.Module):
     def __init__(self, in_features, out_features):
         super(projection, self).__init__()
-        # 定义全连接层
         self.linear = nn.Linear(in_features, out_features)
-        # 定义 Batch Normalization 层（这里使用 BatchNorm1d，适用于输入为 [batch_size, features] 的情况）
         self.bn = nn.BatchNorm1d(out_features)
-        # 定义 ReLU 激活函数
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        # 先经过全连接层
         x = self.linear(x)
-        # 再经过 BN 层
         x = self.bn(x)
-        # 最后经过 ReLU 激活函数
         x = self.relu(x)
         return x

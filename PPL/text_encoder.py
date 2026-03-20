@@ -84,11 +84,7 @@ class CLIPTextContextEncoderGC(nn.Module):
 
     def forward(self, x, context):
         x = x + self.positional_embedding
-        # x = x.permute(1, 0, 2)  # NLD -> LND
-        # x = self.transformer(x)
         x = self.transformer(x, attn_mask=self.attn_mask)
-        # x = x.permute(1, 0, 2)  # LND -> NLD
         x = self.ln_final(x)
         x = x[torch.arange(x.shape[0]), context.argmax(dim=-1)] @ self.text_projection
-        # x = x.reshape(B, K, self.embed_dim) k=prompt_bsz
         return x
