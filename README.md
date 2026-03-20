@@ -139,7 +139,7 @@ You may generate pseudo labels following the procedures provided in the original
 
 ### 4. Training
 
-Stage 1 — VirPro Pretraining
+#### Stage 1 — VirPro Pretraining
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python scripts/pretrain_ppl_multi.py --config ./config/resnet34_backbone.yaml
@@ -161,7 +161,7 @@ distill.teacher_ckpt = "path/to/output_checkpoint.pth"
 in `configs_train/gga/gga_pdg.py` on line 190.
 
 
-Stage 2 — GGA+PGD Training
+#### Stage 2 — GGA+PGD Training
 
 ```bash
 ./tools/dist_train.sh configs_train/gga/gga_pdg.py 1
