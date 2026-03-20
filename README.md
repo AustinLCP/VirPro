@@ -134,7 +134,7 @@ ln -s kitti_data ./data/kitti/kitti_raw
 
 **GGA Pseudo Labels**
 
-You may generate pseudo labels following the procedures provided in the original GGA project. This repository also includes pre-generated pseudo labels (`.pkl` files), which can be used directly.
+You may generate pseudo labels following the procedures provided in the original [GGA](https://github.com/gwenzhang/GGA) project. This repository also includes pre-generated pseudo labels (`data/kitti/*.pkl` files), which can be used directly.
 
 
 ### 4. Training
