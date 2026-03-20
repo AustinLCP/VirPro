@@ -145,10 +145,32 @@ Stage 1 — VirPro Pretraining
 CUDA_VISIBLE_DEVICES=0 python scripts/pretrain_ppl_multi.py --config ./config/resnet34_backbone.yaml
 ```
 
+Then use `utils/ckp_pretrain_to_train.py` to convert a Stage 1 VirPro checkpoint into a backbone-only training checkpoint.
+
+- **`input_checkpoint.pth`**: the checkpoint obtained after Stage~1 pretraining  
+- **`output_checkpoint.pth`**: the converted checkpoint for Stage~2 training  
+
+```bash
+python utils/ckp_pretrain_to_train.py [input_checkpoint.pth] [output_checkpoint.pth]
+```
+
+Before running Stage 2, remember to specify the converted checkpoint as:
+```python
+distill.teacher_ckpt = "path/to/output_checkpoint.pth"
+```
+in `configs_train/gga/gga_pdg.py` on line 190.
+
+
 Stage 2 — GGA+PGD Training
 
 ```bash
 ./tools/dist_train.sh configs_train/gga/gga_pdg.py 1
+```
+
+Use `utils/ckp_train_to_test.py` to convert a stage-2 checkpoint into a test checkpoint by removing `teacher.*` weights and stripping the `student.` prefix, then saving the cleaned model.
+
+```bash
+python utils/ckp_train_to_test.py [input_checkpoint.pth] [output_checkpoint.pth]
 ```
 
 ### 5. Testing
