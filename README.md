@@ -6,7 +6,7 @@ VirPro introduces a **new adaptive multimodal pretraining paradigm** that enrich
 
 ---
 
-## 🚀 Key Innovations
+## 🚀 Key Innovations 
 
 <!-- ### 🔮 Visually-Referred Probabilistic Prompts
 Traditional static prompts cannot capture visual diversity.  
